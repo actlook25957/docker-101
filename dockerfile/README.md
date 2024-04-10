@@ -1,4 +1,4 @@
-## Custom Nginx official image
+## Custom Nginx official image with Dockerfile
 
 create Dockerfile
 ```
