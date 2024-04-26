@@ -82,6 +82,54 @@ copy file into container
 docker cp index.html <id>:/usr/share/nginx/html/index.html
 ```
 
+## Use Postgres official image from registry
+
+pull image
+```
+docker image pull postgres:16
+```
+
+run container postgres
+```
+docker container run postgres:16
+```
+
+run container postgres with set password config
+```
+docker container run --name db -e POSTGRES_PASSWORD=postgres -d postgres:16
+```
+
+run container postgres with more config
+```
+docker container run --name db -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=postgres -d postgres:16
+```
+
+go insite db container
+```
+docker container exec -it db bash
+psql -d postgres -U postgres
+```
+
+Change database
+```
+\c postgres
+```
+
+Show all tables
+```
+\dt
+```
+
+Get all data from table merchants
+```
+select * from merchants;
+```
+
+Quit
+```
+\q
+```
+
 ## Workshop redis
 
 try to use redis offial image create container and it will has log as image below
