@@ -299,3 +299,28 @@ docker compose up frontend_test_playwright -d
 or
 docker-compose up frontend_test_playwright -d
 ```
+
+## Create Mountebank mock REST APIs
+
+in docker-compose add mock_api service
+```
+  mock_api:
+    image: mock-api:latest
+    container_name: mock-api
+    build:
+      context: ./mountebank
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./mountebank/imposters:/imposters
+    ports:
+      - 2525:2525
+      - 8090:8090
+    command: --configfile /imposters/imposters.ejs --allowInjection
+```
+
+run service mock_api
+```
+docker compose up mock_api -d
+or
+docker-compose up mock_api -d
+```
