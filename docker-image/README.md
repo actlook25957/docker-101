@@ -38,9 +38,9 @@ docker container stop <id>
 
 view all containers
 ```
-docker ps -al
+docker ps -a
 or
-docker container ps -al
+docker container ps -a
 ```
 
 remove container by id
