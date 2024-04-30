@@ -96,3 +96,29 @@ try to run container from postgres image again
 ```
 docker container run -d -e POSTGRES_USER=admin -POSTGRES_PASSWORD=1234 -e POSTGRES_DB=demo01 demo-postgres:1.0
 ```
+
+go insite db container
+```
+docker container exec -it db bash
+psql -d postgres -U postgres
+```
+
+Change database
+```
+\c postgres
+```
+
+Show all tables
+```
+\dt
+```
+
+Get all data from table merchants
+```
+select * from merchants;
+```
+
+Quit
+```
+\q
+```
