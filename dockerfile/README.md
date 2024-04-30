@@ -89,11 +89,6 @@ docker image build -t demo-postgres:1.0 .
 
 run container from postgres image
 ```
-docker container run demo-postgres:1.0
-```
-
-try to run container from postgres image again
-```
 docker container run -d -e POSTGRES_USER=admin -POSTGRES_PASSWORD=1234 -e POSTGRES_DB=demo01 demo-postgres:1.0
 ```
 
