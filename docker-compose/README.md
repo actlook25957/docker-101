@@ -58,8 +58,8 @@ in docker-compose after web service
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     volumes:
-      - ./database/table.sql:/docker-entrypoint-initdb.d/1.sql
-      - ./database/data.sql:/docker-entrypoint-initdb.d/2.sql
+      - ./postgres/table.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./postgres/data.sql:/docker-entrypoint-initdb.d/2.sql
 ```
 
 run service db
