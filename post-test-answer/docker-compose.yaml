@@ -1,0 +1,125 @@
+version: '3'
+services:
+  db_01:
+    image: postgres:16.0
+    container_name: postgres1
+    environment:
+      POSTGRES_USER: postgres1
+      POSTGRES_PASSWORD: postgres1
+      POSTGRES_DB: postgres1
+    ports:
+      - 5432:5432
+    volumes:
+      - ./database1/merchant-table.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./database1/merchant-data.sql:/docker-entrypoint-initdb.d/2.sql
+      - ./database1/pet-table.sql:/docker-entrypoint-initdb.d/3.sql
+      - ./database1/pet-data.sql:/docker-entrypoint-initdb.d/4.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  db_02:
+    image: postgres:16.0
+    container_name: postgres2
+    environment:
+      POSTGRES_USER: postgres2
+      POSTGRES_PASSWORD: postgres2
+      POSTGRES_DB: postgres2
+    volumes:
+      - ./database2/user-table.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./database2/user-data.sql:/docker-entrypoint-initdb.d/2.sql
+      - ./database2/food-table.sql:/docker-entrypoint-initdb.d/3.sql
+      - ./database2/food-data.sql:/docker-entrypoint-initdb.d/4.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  backend1:
+    image: backend1:1.0
+    container_name: backend1
+    build:
+      context: ./backend1
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DB1_HOST: db_01
+      DB1_NAME: postgres1
+      DB1_USER: postgres1
+      DB1_PASSWORD: postgres1
+      DB2_HOST: db_02
+      DB2_NAME: postgres2
+      DB2_USER: postgres2
+      DB2_PASSWORD: postgres2  
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      THIRD_PARTY_SERVICE: https://mock_api:8090/users
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/merchants || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s 
+    depends_on:
+      db_01:
+        condition: service_healthy
+      db_02:
+        condition: service_healthy
+
+  backend2:
+    image: backend2:1.0
+    container_name: backend2
+    build:
+      context: ./backend2
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      DB1_HOST: db_01
+      DB1_NAME: postgres1
+      DB1_USER: postgres1
+      DB1_PASSWORD: postgres1
+      DB2_HOST: db_02
+      DB2_NAME: postgres2
+      DB2_USER: postgres2
+      DB2_PASSWORD: postgres2
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3001/pets || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s  
+    depends_on:
+      db_01:
+        condition: service_healthy
+      db_02:
+        condition: service_healthy
+
+  backend_test:
+    build: ./backend-testing
+    container_name: backend-test
+    volumes:
+      - ./backend-testing/reports:/etc/newman/reports
+    depends_on:
+      backend1:
+        condition: service_healthy
+      backend2:
+        condition: service_healthy
+
+  mock_api:
+    image: mock-api:latest
+    container_name: mock-api
+    build:
+      context: ./mountebank
+      dockerfile: ./Dockerfile
+    volumes:
+      - ./mountebank/imposters:/imposters
+    ports:
+      - 2525:2525
+      - 8090:8090
+    command: --configfile /imposters/imposters.ejs --allowInjection
